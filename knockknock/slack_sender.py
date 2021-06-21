@@ -72,7 +72,6 @@ def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = [], 
                     contents = ["Your training is complete 🎉",
                                 'Machine name: %s' % host_name,
                                  #'Main call: %s' % func_name,
-                                'Config: %s' % config,
                                 'Starting date: %s' % start_time.strftime(DATE_FORMAT),
                                 'End date: %s' % end_time.strftime(DATE_FORMAT),
                                 'Training duration: %s' % str(elapsed_time)]
