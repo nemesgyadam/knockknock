@@ -76,7 +76,8 @@ def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = [], 
                                 'Starting date: %s' % start_time.strftime(DATE_FORMAT),
                                 'End date: %s' % end_time.strftime(DATE_FORMAT),
                                 'Training duration: %s' % str(elapsed_time)]
-
+                    for (key, value) in infos.items():
+                        contents.append(key+': '+str(value))
                     try:
                         str_value = str(value)
                         contents.append('Main call returned value: %s'% str_value)
@@ -103,6 +104,8 @@ def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = [], 
                             '%s\n\n' % ex,
                             "Traceback:",
                             '%s' % traceback.format_exc()]
+                for (key, value) in infos.items():
+                    contents.append(key+': '+str(value))
                 contents.append(' '.join(user_mentions))
                 dump['text'] = '\n'.join(contents)
                 dump['icon_emoji'] = ':skull_and_crossbones:'
