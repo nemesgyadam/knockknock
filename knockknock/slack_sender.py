@@ -9,7 +9,7 @@ import requests
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = []):
+def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = [], host=None, infos = {}):
     """
     Slack sender wrapper: execute func, send a Slack notification with the end status
     (sucessfully finished or crashed) at the end. Also send a Slack notification before
@@ -35,7 +35,10 @@ def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = []):
         def wrapper_sender(*args, **kwargs):
 
             start_time = datetime.datetime.now()
-            host_name = socket.gethostname()
+            if host is None:
+                host_name = socket.gethostname()
+            else:
+                host_name = host
             func_name = func.__name__
 
             # Handling distributed training edge case.
@@ -52,8 +55,9 @@ def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = []):
             if master_process:
                 contents = ['Your training has started 🎬',
                             'Machine name: %s' % host_name,
-                            'Main call: %s' % func_name,
                             'Starting date: %s' % start_time.strftime(DATE_FORMAT)]
+                for (key, value) in infos.items():
+                    contents.append(key+': '+str(value))
                 contents.append(' '.join(user_mentions))
                 dump['text'] = '\n'.join(contents)
                 dump['icon_emoji'] = ':clapper:'
@@ -67,7 +71,8 @@ def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = []):
                     elapsed_time = end_time - start_time
                     contents = ["Your training is complete 🎉",
                                 'Machine name: %s' % host_name,
-                                'Main call: %s' % func_name,
+                                 #'Main call: %s' % func_name,
+                                'Config: %s' % config,
                                 'Starting date: %s' % start_time.strftime(DATE_FORMAT),
                                 'End date: %s' % end_time.strftime(DATE_FORMAT),
                                 'Training duration: %s' % str(elapsed_time)]
