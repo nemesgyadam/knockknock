@@ -11,7 +11,7 @@ When training deep learning models, it is common to use early stopping. Apart fr
 Install with `pip` or equivalent.
 
 ```bash
-pip install knockknock
+pip install git+https://github.com/nemesgyadam/knockknock
 ```
 
 This code has only been tested with Python >= 3.6.
