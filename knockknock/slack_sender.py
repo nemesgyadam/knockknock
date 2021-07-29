@@ -9,7 +9,7 @@ import requests
 
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = [], host=None, infos = {}):
+def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = [], host=None, infos = {}, send_start_notif=False):
     """
     Slack sender wrapper: execute func, send a Slack notification with the end status
     (sucessfully finished or crashed) at the end. Also send a Slack notification before
@@ -53,18 +53,19 @@ def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = [], 
                 master_process = True
 
             if master_process:
-                contents = ['Your training has started 🎬',
-                            'Machine name: %s' % host_name,
-                            'Starting date: %s' % start_time.strftime(DATE_FORMAT)]
-                for (key, value) in infos.items():
-                    contents.append(key+': '+str(value))
-                contents.append(' '.join(user_mentions))
-                dump['text'] = '\n'.join(contents)
-                dump['icon_emoji'] = ':clapper:'
-                requests.post(webhook_url, json.dumps(dump))
+                if send_start_notif:
+                    contents = ['Your training has started 🎬',
+                                'Machine name: %s' % host_name,
+                                'Starting date: %s' % start_time.strftime(DATE_FORMAT)]
+                    for (key, value) in infos.items():
+                        contents.append(key+': '+str(value))
+                    contents.append(' '.join(user_mentions))
+                    dump['text'] = '\n'.join(contents)
+                    dump['icon_emoji'] = ':clapper:'
+                    requests.post(webhook_url, json.dumps(dump))
 
             try:
-                value = func(*args, **kwargs)
+                return_value = func(*args, **kwargs)
 
                 if master_process:
                     end_time = datetime.datetime.now()
@@ -78,7 +79,7 @@ def slack_sender(webhook_url: str, channel: str, user_mentions: List[str] = [], 
                     for (key, value) in infos.items():
                         contents.append(key+': '+str(value))
                     try:
-                        str_value = str(value)
+                        str_value = str(return_value)
                         contents.append('Main call returned value: %s'% str_value)
                     except:
                         contents.append('Main call returned value: %s'% "ERROR - Couldn't str the returned value.")
